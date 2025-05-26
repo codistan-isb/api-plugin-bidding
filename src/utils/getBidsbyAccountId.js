@@ -15,16 +15,18 @@ import decodeOpaqueId from "@reactioncommerce/api-utils/decodeOpaqueId.js";
 export default async function getBidsbyAccountId(context, args) {
   const { collections } = context;
   const { Bids } = collections;
-  const { shopId, productId, offer ,variantId,soldby} = args;
+  const { shopId, productId, offer, variantId, soldby } = args;
   let accountId = context.userId;
-//  let bids= await Bids.find({$or: [{"createdBy":accountId},{"soldBy":accountId}]}).sort({"updatedAt":-1}).limit(1).toArray();
- let bids= await Bids.aggregate([{$match:{$or: [{"createdBy":accountId},{"soldBy":accountId}]}},{$group:{_id:{createdBy:"$createdBy",soldBy:"$soldBy"}, data:{$push:"$$ROOT"}}}]).toArray()
- let contacts=[];
- if(bids){
-   bids.map(bid=>{
-    contacts.push(bid.data[0])
-   })
- }
- console.log("ctl",contacts.length)
- return contacts;
+
+  console.log("HIT THE QUERY GET BIDS BY ACCOUNT ID")
+  //  let bids= await Bids.find({$or: [{"createdBy":accountId},{"soldBy":accountId}]}).sort({"updatedAt":-1}).limit(1).toArray();
+  let bids = await Bids.aggregate([{ $match: { $or: [{ "createdBy": accountId }, { "soldBy": accountId }] } }, { $group: { _id: { createdBy: "$createdBy", soldBy: "$soldBy" }, data: { $push: "$$ROOT" } } }]).toArray()
+  let contacts = [];
+  if (bids) {
+    bids.map(bid => {
+      contacts.push(bid.data[0])
+    })
+  }
+  console.log("ctl", contacts.length)
+  return contacts;
 }

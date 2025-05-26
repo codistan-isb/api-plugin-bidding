@@ -3,6 +3,7 @@ import decodeOpaqueId from "@reactioncommerce/api-utils/decodeOpaqueId.js";
 import coinToss from "./coinToss.js";
 import getProductbyId from "./getProductbyId.js";
 import createNotification from "./createNotification.js";
+import { sendMessage } from "./sendMessage.js";
 
 /**
  *
@@ -69,13 +70,13 @@ export default async function createOffer(context, args) {
           sellerOffer: isSeller(context, bidExist.createdBy)
             ? offerObj
             : bidExist.sellerOffer
-            ? bidExist.sellerOffer
-            : null,
+              ? bidExist.sellerOffer
+              : null,
           buyerOffer: !isSeller(context, bidExist.createdBy)
             ? offerObj
             : bidExist.buyerOffer
-            ? bidExist.buyerOffer
-            : null,
+              ? bidExist.buyerOffer
+              : null,
           activeOffer: offerObj,
           status: "inProgress",
           canAccept: to,
@@ -119,6 +120,13 @@ export default async function createOffer(context, args) {
         );
       }
     }
+    const productTitle = product.product.slug;
+    const productLink = `https://staging.bizb.store/products/${productTitle}`; // Adjust this URL format as needed
+    const offerAmount = bidExist.activeOffer.amount.amount;
+
+    const buyerMessage = `Dear buyer, your offer of PKR ${offerAmount} for "${productTitle}" has been accepted by the seller. Please purchase before it expires. View product: ${productLink}. Thanks`;
+    console.log("buyerMessage", buyerMessage);
+    await sendMessage(context, to, buyerMessage, null);
     createNotification(context, {
       details: null,
       from: accountId,
@@ -157,6 +165,12 @@ export default async function createOffer(context, args) {
         },
       }
     );
+    const productTitle = product.product.slug;
+    const productLink = `https://staging.bizb.store/products/${productTitle}`; // Adjust this URL format as needed
+    const offerAmount = bidExist.activeOffer.amount.amount;
+    const buyerMessage = `Dear buyer, your offer of PKR ${offerAmount} for "${productTitle}" has been rejected by the seller View product: ${productLink}. Thanks`;
+    console.log("buyerMessage", buyerMessage);
+    await sendMessage(context, to, buyerMessage, null)
   } else if (type == "gameRequest") {
     createNotification(context, {
       details: null,
@@ -267,7 +281,7 @@ export default async function createOffer(context, args) {
           console.log("cart updated", cart_update);
         }
       }
-       date = new Date();
+      date = new Date();
       date.setDate(date.getDate() + 1);
       valid_till = date;
       bid_update = await Bids.updateOne(
@@ -293,7 +307,7 @@ export default async function createOffer(context, args) {
       );
     } else {
       // game lost
-       date = new Date();
+      date = new Date();
       date.setDate(date.getDate() + 1);
       valid_till = date;
       loserOffer = bidExist.buyerOffer ? bidExist.buyerOffer : null;

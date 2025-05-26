@@ -3,6 +3,7 @@ import decodeOpaqueId from "@reactioncommerce/api-utils/decodeOpaqueId.js";
 import createNotification from "./createNotification.js";
 import getProductbyId from "./getProductbyId.js";
 import getAccountById from "./getAccountById.js";
+import { sendMessage } from "./sendMessage.js";
 /**
  *
  * @method placeBidOnProduct
@@ -15,7 +16,8 @@ import getAccountById from "./getAccountById.js";
  * @param {Boolean} args.shouldIncludeArchived - Include archived units in results
  * @returns {Promise<Object[]>} Array of Unit Variant objects.
  */
-export default async function placeBidOnProduct(context, args) {
+export default async function
+  placeBidOnProduct(context, args) {
   const { collections, pubSub } = context;
   const { Bids } = collections;
   const {
@@ -111,6 +113,9 @@ export default async function placeBidOnProduct(context, args) {
       console.log("contactExists", contactExists);
     }
     console.log("product for bid", product);
+    const sellerBidMessage = `You have received a new bid of ${offer.amount.amount} on ${product.product.title}`;
+    const sellerId = insert_obj.soldBy;
+    await sendMessage(context, sellerId, sellerBidMessage, null)
     createNotification(context, {
       details: null,
       from: accountId,
@@ -121,6 +126,7 @@ export default async function placeBidOnProduct(context, args) {
       type: "bid",
       url: `/en/chat?bidId=${BidsAdded.insertedId}`,
     });
+
     return BidsAdded.insertedId;
     // return Bids.findOne({"_id":BidsAdded.insertedId});
   } else {
