@@ -1,9 +1,9 @@
 type Bid implements Node {
   _id: ID!
   productId: ID!
-  productSlug:String!
-  reactionVariantId:ID!
-  reactionProductId:ID!
+  productSlug: String!
+  reactionVariantId: ID!
+  reactionProductId: ID!
   product: ProductVariant
   updatedAt: DateTime
   createdAt: DateTime
@@ -27,6 +27,19 @@ type Bid implements Node {
   soldBy: ID
   soldByInfo: createdByUserinfo
 }
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: ConnectionCursor
+  endCursor: ConnectionCursor
+}
+
+type BidConnection {
+  bids: [Bid]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
 type Offer implements Node {
   _id: ID!
   amount: Money!
@@ -43,7 +56,13 @@ type Offer implements Node {
 }
 extend type Query {
   getBidsbyAccountId: [Bid]
-  getBidsbySellerId: [Bid]
+  getBidsbySellerId(first: Int, after: String): BidConnection
+  getRecentOffer(
+    productId: ID!
+    variantId: ID!
+    first: Int
+    after: String
+  ): BidConnection
   myNotifications: [Notification]
   getActiveBidOnProduct(input: activeBidInput): activeBidPayLoad
   getBidsbyUserId(userId: ID!, isSeller: Boolean!): [Bid]
@@ -178,7 +197,7 @@ extend type Mutation {
 }
 extend type Query {
   getUserByuserName(userName: String!): userProfile
-  isAvailable(userName:String!):Boolean
+  isAvailable(userName: String!): Boolean
 }
 type followUserInfo {
   image: String
@@ -198,7 +217,7 @@ type profileObj {
   username: String
 }
 extend type ProductVariant {
-slug:String
+  slug: String
 }
 type userProfile {
   name: String

@@ -1,5 +1,6 @@
 import generateUID from "./generateUID.js";
 import decodeOpaqueId from "@reactioncommerce/api-utils/decodeOpaqueId.js";
+import encodeOpaqueId from "@reactioncommerce/api-utils/encodeOpaqueId.js";
 /**
  *
  * @method getBidsbySellerId
@@ -10,14 +11,55 @@ import decodeOpaqueId from "@reactioncommerce/api-utils/decodeOpaqueId.js";
  * @param {Object} args - an object of all arguments that were sent by the client
  * @param {Boolean} args.shouldIncludeHidden - Include hidden units in results
  * @param {Boolean} args.shouldIncludeArchived - Include archived units in results
- * @returns {Promise<Object[]>} Array of Unit Variant objects.
+ * @param {Number} args.first - Number of items to return
+ * @param {String} args.after - Cursor for pagination
+ * @returns {Promise<Object>} Object containing bids array and pagination info
  */
 export default async function getBidsbySellerId(context, args) {
   const { collections } = context;
   const { Bids } = collections;
-  const { bidId} = args;
+  const { first = 20, after } = args;
   let accountId = context.userId;
-  console.log("accountId",accountId);
- let bids= await Bids.find({"soldBy":accountId}).sort({"updatedAt":-1}).limit(1).toArray();
- return bids;
+  console.log("accountId", accountId);
+
+  let query = { soldBy: accountId };
+
+  if (after) {
+    try {
+      const decodedCursor = decodeOpaqueId(after);
+      query._id = { $gt: decodedCursor };
+    } catch (error) {
+      console.error("Invalid cursor:", error);
+      throw new Error("Invalid cursor");
+    }
+  }
+
+  const totalCount = await Bids.countDocuments({ soldBy: accountId });
+
+  let bids = await Bids.find(query)
+    .sort({ updatedAt: -1 })
+    .limit(first + 1)
+    .toArray();
+
+  const hasNextPage = bids.length > first;
+  if (hasNextPage) {
+    bids = bids.slice(0, first);
+  }
+
+  const pageInfo = {
+    hasNextPage,
+    hasPreviousPage: !!after,
+    startCursor:
+      bids.length > 0 ? encodeOpaqueId("reaction/bid", bids[0]._id) : null,
+    endCursor:
+      bids.length > 0
+        ? encodeOpaqueId("reaction/bid", bids[bids.length - 1]._id)
+        : null,
+  };
+
+  return {
+    bids,
+    pageInfo,
+    totalCount,
+  };
 }
