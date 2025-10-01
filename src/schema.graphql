@@ -40,6 +40,224 @@ type BidConnection {
   pageInfo: PageInfo!
   totalCount: Int!
 }
+
+type AllOffersConnection {
+  offers: [DetailedOffer]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DetailedOffer {
+  _id: ID!
+  productId: ID!
+  variantId: ID!
+  productSlug: String!
+  reactionVariantId: ID!
+  reactionProductId: ID!
+  shopId: ID!
+  createdBy: ID!
+  soldBy: ID!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Product Details
+  product: ProductDetails
+
+  # User Details
+  buyer: UserDetails
+  seller: UserDetails
+
+  # Offer Details
+  activeOffer: Offer
+  buyerOffer: Offer
+  sellerOffer: Offer
+  acceptedOffer: Offer
+  offers: [Offer]!
+
+  # Game Details
+  gameCanAccept: ID
+  acceptedGame: Offer
+  gameAcceptedAt: DateTime
+  gameAcceptedBy: ID
+  wonBy: ID
+  lostBy: ID
+  acceptAction: String
+  acceptedBy: ID
+}
+
+type ProductDetails {
+  _id: ID!
+  productId: ID!
+  title: String!
+  slug: String!
+  description: String
+  type: String!
+  isVisible: Boolean!
+  isDeleted: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  shopId: ID!
+  vendor: String
+  originCountry: String
+  sku: String
+  barcode: String
+  pageTitle: String
+  metaDescription: String
+  weight: Float
+  length: Float
+  width: Float
+  height: Float
+
+  # Media
+  primaryImage: MediaDetails
+  media: [MediaDetails]!
+
+  # Pricing
+  pricing: PricingDetails
+
+  # Product Status
+  isBackorder: Boolean!
+  isLowQuantity: Boolean!
+  isSoldOut: Boolean!
+
+  # Metafields
+  metafields: [Metafield]!
+
+  # Variants
+  variants: [VariantDetails]!
+
+  # Tags
+  tagIds: [ID]!
+
+  # Social Metadata
+  socialMetadata: [SocialMetadata]!
+
+  # Supported Fulfillment Types
+  supportedFulfillmentTypes: [String]!
+}
+
+type VariantDetails {
+  _id: ID!
+  variantId: ID!
+  title: String!
+  optionTitle: String!
+  attributeLabel: String
+  index: Int!
+  sku: String
+  barcode: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  shopId: ID!
+  ancestorId: ID!
+
+  # Media
+  media: [MediaDetails]!
+  primaryImage: MediaDetails
+
+  # Pricing
+  pricing: PricingDetails
+
+  # Variant Status
+  isSoldOut: Boolean!
+  isTaxable: Boolean!
+  taxCode: String
+  taxDescription: String
+
+  # Uploader Info
+  uploadedBy: UploaderInfo
+
+  # Metafields
+  metafields: [Metafield]!
+
+  # Physical Properties
+  weight: Float
+  length: Float
+  width: Float
+  height: Float
+  originCountry: String
+  minOrderQuantity: Int
+  size: String
+}
+
+type UserDetails {
+  _id: ID!
+  userId: ID!
+  name: String
+  username: String
+  email: String
+  profile: UserProfile
+  storeName: String
+  storeLogo: String
+  bio: String
+  roles: String
+  total_spent: Float
+  billing: AddressDetails
+  shipping: AddressDetails
+  createdAt: DateTime
+  updatedAt: DateTime
+  shopId: ID
+  state: String
+  acceptsMarketing: String
+  wp_user_id: String
+}
+
+type UserProfile {
+  name: String
+  picture: String
+  username: String
+  identityVerified: Boolean
+}
+
+type AddressDetails {
+  firstname: String
+  lastname: String
+  company: String
+  email: String
+  phone: String
+  address: String
+  address2: String
+  postcode: String
+  city: String
+  state: String
+  country: String
+}
+
+type MediaDetails {
+  URLs: MediaURLs!
+  priority: Int!
+  productId: String
+}
+
+type MediaURLs {
+  large: String
+  medium: String
+  original: String
+  small: String
+  thumbnail: String
+}
+
+type PricingDetails {
+  USD: CurrencyPricing
+}
+
+type CurrencyPricing {
+  compareAtPrice: Float
+  displayPrice: String
+  maxPrice: Float
+  minPrice: Float
+  price: Float
+}
+
+type UploaderInfo {
+  name: String!
+  userId: ID!
+}
+
+type Money {
+  amount: Float!
+  currencyCode: String!
+}
 type Offer implements Node {
   _id: ID!
   amount: Money!
@@ -66,6 +284,13 @@ extend type Query {
   myNotifications: [Notification]
   getActiveBidOnProduct(input: activeBidInput): activeBidPayLoad
   getBidsbyUserId(userId: ID!, isSeller: Boolean!): [Bid]
+  getAllOffersWithDetails(
+    first: Int
+    after: String
+    status: String
+    productId: ID
+    userId: ID
+  ): AllOffersConnection
 }
 type Notification {
   _id: ID

@@ -6,6 +6,7 @@ import getActiveBids from "../utils/getActiveBids.js";
 import getNotificationByAccountId from "../utils/getNotificationByAccountId.js";
 import getAccountByuserName from "../utils/getAccountByuserName.js";
 import isAvailable from "../utils/isAvailable.js";
+import getAllOffersWithDetails from "../utils/getAllOffersWithDetails.js";
 export default {
   async isAvailable(parent, args, context, info) {
     console.log("is available ");
@@ -130,5 +131,15 @@ export default {
     } else {
       throw new Error("User does not exist.");
     }
+  },
+  async getAllOffersWithDetails(parent, args, context, info) {
+    console.log("getAllOffersWithDetails", args);
+    let accountId = context.userId;
+    if (!accountId || accountId == null) {
+      console.log("Unauthenticated user");
+      throw new Error("Unauthenticated user");
+    }
+    let result = await getAllOffersWithDetails(context, args);
+    return result;
   },
 };
