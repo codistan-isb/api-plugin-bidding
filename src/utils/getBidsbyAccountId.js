@@ -20,7 +20,7 @@ export default async function getBidsbyAccountId(context, args) {
 
   console.log("HIT THE QUERY GET BIDS BY ACCOUNT ID")
   //  let bids= await Bids.find({$or: [{"createdBy":accountId},{"soldBy":accountId}]}).sort({"updatedAt":-1}).limit(1).toArray();
-  let bids = await Bids.aggregate([{ $match: { $or: [{ "createdBy": accountId }, { "soldBy": accountId }] } }, { $group: { _id: { createdBy: "$createdBy", soldBy: "$soldBy" }, data: { $push: "$$ROOT" } } }]).toArray()
+    let bids = await Bids.aggregate([{ $match: { $or: [{ "createdBy": accountId }, { "soldBy": accountId }] } }, { $group: { _id: { createdBy: "$createdBy", soldBy: "$soldBy" }, data: { $push: "$$ROOT" } } }]).toArray()
   let contacts = [];
   if (bids) {
     bids.map(bid => {
